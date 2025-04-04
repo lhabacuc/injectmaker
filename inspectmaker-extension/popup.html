@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>InspectMaker</title>
+  <link rel="stylesheet" href="css/fontawesome.min.css">
+  <link rel="stylesheet" href="js/vendor/codemirror/codemirror.min.css">
+  <link rel="stylesheet" href="js/vendor/codemirror/monokai.min.css">
+  <link rel="stylesheet" href="js/vendor/codemirror/addon/hint/show-hint.css">
+  <link rel="stylesheet" href="css/popup.css">
+</head>
+
+<body>
+  <div class="container">
+    <header class="header">
+      <div class="logo">
+        <span class="icon" id="code-icon"></span>
+        <span>InspectMaker</span>
+      </div>
+      <div class="header-actions">
+        <button id="export-scripts-btn" class="icon-button" title="Exportar Scripts">
+          <span class="icon" id="export-icon"></span>
+        </button>
+        <button id="import-scripts-btn" class="icon-button" title="Importar Scripts">
+          <span class="icon" id="import-icon"></span>
+        </button>
+        <button id="dark-mode-toggle" class="icon-button" title="Alternar Modo Escuro">
+          <span class="icon" id="moon-icon"></span>
+        </button>
+        <button id="fullscreen-toggle" class="icon-button" title="Alternar Tela Cheia">
+          <span class="icon" id="expand-icon"></span>
+        </button>
+        <span id="version-info">v1.0.0</span>
+      </div>
+    </header>
+
+    <div class="tab-navigation">
+      <button class="tab-button active" data-tab="scripts">
+        <span class="icon" id="list-icon"></span> Scripts
+      </button>
+      <button class="tab-button" data-tab="definitions">
+        <span class="icon" id="settings-icon"></span> Definições
+      </button>
+      <button class="tab-button" data-tab="help">
+        <span class="icon" id="help-icon"></span> Ajuda
+      </button>
+    </div>
+
+    <!-- Scripts Tab -->
+    <div class="tab-content active" id="scripts-tab">
+      <div class="scripts-container">
+        <div class="script-list-container">
+          <div class="script-list-header">
+            <h3>Meus Scripts</h3>
+            <input type="text" class="search-input" placeholder="Pesquisar scripts..." id="search-scripts">
+          </div>
+          <div class="script-list-action">
+            <button class="btn btn-primary" style="width: 100%; margin-bottom: 10px;" id="new-script-btn">
+              <span class="icon" id="plus-icon"></span> Novo Script
+            </button>
+          </div>
+          <div class="script-list" id="script-list">
+            <!-- Empty state -->
+            <div class="empty-list" id="empty-scripts-message">
+              <span class="icon" id="script-icon"></span>
+              <p>Nenhum script encontrado</p>
+              <p>Crie seu primeiro script clicando no botão acima</p>
+            </div>
+            <!-- Scripts will be injected here -->
+          </div>
+          </div>
+        </div>
+
+        <div class="script-details" id="script-details">
+          <!-- No selection state -->
+          <div class="no-selection" id="no-selection-message">
+            <span class="icon" id="click-icon"></span>
+            <p>Selecione um script para editar</p>
+            <p>ou crie um novo script</p>
+          </div>
+
+          <!-- Script Details Content -->
+          <div id="script-detail-content" class="hidden">
+            <!-- Botões de ação movidos para o topo -->
+            <div class="script-detail-actions">
+              <button class="btn btn-secondary" id="edit-script-btn">
+                <span class="icon" id="edit-icon"></span> Editar
+              </button>
+              <button class="btn btn-primary hidden" id="save-script-btn">
+                <span class="icon" id="save-icon"></span> Salvar
+              </button>
+              <button class="btn btn-success" id="run-script-btn">
+                <span class="icon" id="play-icon"></span> Executar
+              </button>
+              <button class="btn btn-success" id="inject-script-btn">
+                <span class="icon" id="inject-icon"></span> Ativar Injeção
+              </button>
+              <button class="btn btn-danger" id="remove-injection-btn">
+                <span class="icon" id="remove-icon"></span> Remover Injeção
+              </button>
+            </div>
+            
+            <div class="script-tabs">
+              <button class="script-tab-button active" data-script-tab="code">
+                <span class="icon" id="code-icon"></span> Código
+              </button>
+              <button class="script-tab-button" data-script-tab="settings">
+                <span class="icon" id="settings-icon"></span> Configurações
+              </button>
+              <button class="script-tab-button" data-script-tab="logs">
+                <span class="icon" id="logs-icon"></span> Logs
+              </button>
+            </div>
+
+            <!-- Code Tab -->
+            <div class="script-tab-content active" id="code-tab">
+              <div class="editor-container" id="code-editor"></div>
+            </div>
+
+            <!-- Settings Tab -->
+            <div class="script-tab-content" id="settings-tab">
+              <form id="script-settings-form">
+                <div class="settings-grid">
+                  <div class="form-group">
+                    <label class="form-label" for="script-name">Nome do Script</label>
+                    <input type="text" class="form-input" id="script-name">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="script-enabled">Status</label>
+                    <div class="form-checkbox">
+                      <input type="checkbox" id="script-enabled">
+                      <label for="script-enabled">Script ativo</label>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="settings-grid">
+                  <div class="form-group">
+                    <label class="form-label" for="injection-mode">Modo de injeção</label>
+                    <select class="form-select" id="injection-mode">
+                      <option value="instantaneous">Instantâneo (ao carregar a página)</option>
+                      <option value="delayed">Atrasado (após tempo definido)</option>
+                      <option value="onDemand">Sob demanda (manual)</option>
+                      <option value="eventBased">Baseado em evento</option>
+                      <option value="persistent">Persistente (intervalo)</option>
+                      <option value="urlBased">Mudança de URL (para SPAs)</option>
+                      <option value="elementCreated">Criação de elemento</option>
+                      <option value="ajaxInterceptor">Interceptação de AJAX</option>
+                      <option value="historyStateChanged">Mudança de estado de navegação</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="execution-environment">Ambiente de execução</label>
+                    <select class="form-select" id="execution-environment">
+                      <option value="browser">Navegador</option>
+                      <option value="pc">PC (Node.js)</option>
+                      <option value="browserWithHelper">Navegador com Helper PC</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- Conditional Settings -->
+                <div class="conditional-setting" id="delayed-settings">
+                  <div class="form-group">
+                    <label class="form-label" for="delay-time">Tempo de atraso (ms)</label>
+                    <input type="number" class="form-input" id="delay-time" min="0" value="1000">
+                  </div>
+                </div>
+
+                <div class="conditional-setting" id="event-settings">
+                  <div class="form-group">
+                    <label class="form-label" for="event-preset">Eventos pré-definidos</label>
+                    <select class="form-select" id="event-preset">
+                      <option value="">-- Selecione um evento --</option>
+                      <optgroup label="Eventos comuns">
+                        <option value="click">click - Clique do mouse</option>
+                        <option value="DOMContentLoaded">DOMContentLoaded - DOM carregado</option>
+                        <option value="load">load - Página completamente carregada</option>
+                        <option value="submit">submit - Envio de formulário</option>
+                        <option value="mouseover">mouseover - Mouse sobre elemento</option>
+                        <option value="keydown">keydown - Tecla pressionada</option>
+                        <option value="scroll">scroll - Rolagem da página</option>
+                        <option value="resize">resize - Redimensionamento da janela</option>
+                      </optgroup>
+                      <optgroup label="Eventos avançados">
+                        <option value="visibilitychange">visibilitychange - Mudança de visibilidade</option>
+                        <option value="storage">storage - Alteração no localStorage</option>
+                        <option value="focus">focus - Elemento recebe foco</option>
+                        <option value="blur">blur - Elemento perde foco</option>
+                        <option value="input">input - Entrada de dados</option>
+                        <option value="change">change - Mudança de valor</option>
+                      </optgroup>
+                      <optgroup label="Eventos personalizados">
+                        <option value="custom:pageReady">custom:pageReady - Página pronta</option>
+                        <option value="custom:ajaxComplete">custom:ajaxComplete - AJAX completado</option>
+                        <option value="custom:elementCreated">custom:elementCreated - Elemento criado</option>
+                        <option value="custom:routeChanged">custom:routeChanged - Rota alterada (SPA)</option>
+                      </optgroup>
+                    </select>
+                    <small>Selecione um dos eventos pré-definidos ou digite um evento personalizado abaixo</small>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label" for="event-trigger">Evento de gatilho</label>
+                    <input type="text" class="form-input" id="event-trigger" placeholder="Ex: click, keydown, etc.">
+                    <small>Eventos personalizados devem começar com "custom:" (ex: custom:meuEvento)</small>
+                  </div>
+                  
+                  <div class="form-group">
+                    <label class="form-label">Exemplo de código para este evento</label>
+                    <pre id="event-code-example" style="background-color: #f5f5f5; padding: 10px; border-radius: 4px; overflow: auto; max-height: 200px; font-family: monospace; font-size: 13px;">// Selecione um evento para ver um exemplo de código</pre>
+                  </div>
+                </div>
+
+                <div class="conditional-setting" id="persistent-settings">
+                  <div class="form-group">
+                    <label class="form-label" for="persistent-interval">Intervalo de execução (ms)</label>
+                    <input type="number" class="form-input" id="persistent-interval" min="100" value="5000">
+                  </div>
+                </div>
+                
+                <!-- Browser Specific Settings -->
+                <div class="conditional-setting" id="browser-specific-settings">
+                  <h3 class="settings-subsection-title">Configurações específicas de navegador</h3>
+                  <div class="settings-grid">
+                    <div class="form-group">
+                      <label class="form-label" for="chrome-injection-method">Chrome</label>
+                      <select class="form-select" id="chrome-injection-method">
+                        <option value="standard">Padrão</option>
+                        <option value="browser-api">API do navegador</option>
+                        <option value="eval-injection">Injeção Eval</option>
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label" for="firefox-injection-method">Firefox</label>
+                      <select class="form-select" id="firefox-injection-method">
+                        <option value="standard">Padrão</option>
+                        <option value="browser-api">API do navegador</option>
+                        <option value="eval-injection">Injeção Eval</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="settings-grid">
+                    <div class="form-group">
+                      <label class="form-label" for="edge-injection-method">Edge</label>
+                      <select class="form-select" id="edge-injection-method">
+                        <option value="standard">Padrão</option>
+                        <option value="browser-api">API do navegador</option>
+                        <option value="eval-injection">Injeção Eval</option>
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label" for="safari-injection-method">Safari</label>
+                      <select class="form-select" id="safari-injection-method">
+                        <option value="standard">Padrão</option>
+                        <option value="browser-api">API do navegador</option>
+                        <option value="eval-injection">Injeção Eval</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- URL Patterns Settings -->
+                <div class="form-group">
+                  <label class="form-label">Padrões de URL</label>
+                  <div class="url-patterns-wrapper">
+                    <div class="url-patterns-header">
+                      <textarea class="form-textarea" id="url-patterns" placeholder="Ex: https://exemplo.com/*"></textarea>
+                      <small>Use * como curinga. Deixe em branco para executar em todos os sites. Um padrão por linha.</small>
+                    </div>
+                    <div class="url-patterns-list" id="url-patterns-list">
+                      <!-- Lista de URLs será gerada pelo JavaScript -->
+                    </div>
+                  </div>
+                </div>
+              </form>
+            </div>
+
+            <!-- Logs Tab -->
+            <div class="script-tab-content" id="logs-tab">
+              <div class="logs-container" id="script-logs">
+                <div class="log-entry">
+                  <span class="log-time">10:30:45</span>
+                  <span>Script iniciado</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Definitions Tab -->
+    <div class="tab-content" id="definitions-tab">
+      <div class="settings-container">
+        <div class="settings-section">
+          <h2 class="settings-section-title">Configurações Gerais</h2>
+          <div class="settings-grid">
+            <div class="form-group">
+              <label class="form-label" for="default-execution-environment">Ambiente de execução padrão</label>
+              <select class="form-select" id="default-execution-environment">
+                <option value="browser">Navegador</option>
+                <option value="pc">PC (Node.js)</option>
+                <option value="browserWithHelper">Navegador com Helper PC</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="editor-theme">Tema do editor</label>
+              <select class="form-select" id="editor-theme">
+                <option value="default">Claro</option>
+                <option value="dark">Escuro</option>
+                <option value="monokai">Monokai</option>
+                <option value="github">GitHub</option>
+              </select>
+            </div>
+          </div>
+          <div class="settings-grid">
+            <div class="form-group">
+              <label class="form-label" for="font-size">Tamanho da fonte</label>
+              <select class="form-select" id="font-size">
+                <option value="12px">12px</option>
+                <option value="14px" selected>14px</option>
+                <option value="16px">16px</option>
+                <option value="18px">18px</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="tab-size">Tamanho da tabulação</label>
+              <select class="form-select" id="tab-size">
+                <option value="2">2 espaços</option>
+                <option value="4">4 espaços</option>
+              </select>
+            </div>
+          </div>
+          <div class="settings-grid">
+            <div class="form-group">
+              <div class="form-checkbox">
+                <input type="checkbox" id="dark-mode">
+                <label for="dark-mode">Modo escuro</label>
+              </div>
+              <small>Ativa a interface em modo escuro para maior conforto visual</small>
+            </div>
+            <div class="form-group">
+              <div class="form-checkbox">
+                <input type="checkbox" id="fullscreen-editor">
+                <label for="fullscreen-editor">Editor em tela cheia</label>
+              </div>
+              <small>Abre o editor em modo tela cheia por padrão</small>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <h2 class="settings-section-title">Configuração do Servidor Local</h2>
+          <div class="form-group">
+            <div class="form-checkbox">
+              <input type="checkbox" id="use-local-helper">
+              <label for="use-local-helper">Usar servidor helper local</label>
+            </div>
+          </div>
+          <div class="form-group" id="local-server-settings">
+            <label class="form-label" for="local-server-port">Porta do servidor local</label>
+            <input type="number" class="form-input" id="local-server-port" value="8081" min="1024" max="65535">
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <h2 class="settings-section-title">Licença</h2>
+          <div class="form-group">
+            <label class="form-label" for="license-key">Chave de Licença</label>
+            <div style="display: flex; gap: 8px;">
+              <input type="text" class="form-input" id="license-key" placeholder="Digite sua chave de licença" style="flex: 1;">
+              <button class="btn btn-primary" id="verify-license-btn">Verificar</button>
+            </div>
+            <div id="license-status" style="margin-top: 8px; padding: 8px; border-radius: 4px; display: none;"></div>
+            <small>A chave de licença é verificada periodicamente para garantir que você tenha acesso a todos os recursos.</small>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <h2 class="settings-section-title">Segurança</h2>
+          <div class="form-group">
+            <div class="form-checkbox">
+              <input type="checkbox" id="elevated-permissions">
+              <label for="elevated-permissions">Permitir permissões elevadas</label>
+            </div>
+            <small>Permite que os scripts usem APIs adicionais do navegador (requer reinicialização da extensão).</small>
+          </div>
+          <div class="form-group">
+            <div class="form-checkbox">
+              <input type="checkbox" id="safe-mode">
+              <label for="safe-mode">Modo de segurança</label>
+            </div>
+            <small>Analisa os scripts em busca de operações potencialmente perigosas antes de executá-los.</small>
+          </div>
+          <div class="form-group">
+            <div class="form-checkbox">
+              <input type="checkbox" id="sandbox-scripts">
+              <label for="sandbox-scripts">Executar scripts em sandbox</label>
+            </div>
+            <small>Isola os scripts do ambiente principal para evitar modificações não autorizadas.</small>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="domain-whitelist">Lista de domínios permitidos (um por linha)</label>
+            <textarea class="form-textarea" id="domain-whitelist" placeholder="Ex: exemplo.com"></textarea>
+            <small>Os scripts só serão executados nos domínios listados. Deixe em branco para permitir todos os domínios.</small>
+          </div>
+        </div>
+        
+        <div class="settings-section">
+          <h2 class="settings-section-title">Configurações Avançadas</h2>
+          <div class="form-group">
+            <label class="form-label" for="script-execution-timeout">Timeout de execução (ms)</label>
+            <input type="number" class="form-input" id="script-execution-timeout" min="500" max="30000" value="5000">
+            <small>Tempo máximo de execução para scripts (em milissegundos)</small>
+          </div>
+          <div class="form-group">
+            <div class="form-checkbox">
+              <input type="checkbox" id="auto-save-scripts">
+              <label for="auto-save-scripts">Salvar scripts automaticamente</label>
+            </div>
+            <small>Salva automaticamente as alterações nos scripts</small>
+          </div>
+          <div class="form-group">
+            <div class="form-checkbox">
+              <input type="checkbox" id="enable-script-logs">
+              <label for="enable-script-logs">Habilitar logs detalhados</label>
+            </div>
+            <small>Mantém um histórico detalhado de execuções para todos os scripts</small>
+          </div>
+          <div class="form-group">
+            <div class="form-checkbox">
+              <input type="checkbox" id="browser-specific-injection">
+              <label for="browser-specific-injection">Injeção específica para navegador</label>
+            </div>
+            <small>Otimiza o método de injeção para o navegador atual (Chrome, Firefox, Edge)</small>
+          </div>
+        </div>
+
+        <div class="settings-actions">
+          <button class="btn btn-secondary" id="reset-settings-btn">
+            <span class="icon" id="reset-icon"></span> Restaurar padrões
+          </button>
+          <button class="btn btn-primary" id="save-settings-btn">
+            <span class="icon" id="save-icon"></span> Salvar configurações
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Help Tab -->
+    <div class="tab-content" id="help-tab">
+      <div class="help-container">
+        <div class="help-section">
+          <h2 class="help-section-title">Guia do InspectMaker</h2>
+          
+          <div class="help-card">
+            <h3 class="help-card-title">
+              <span class="icon" id="intro-icon"></span> Introdução
+            </h3>
+            <p>O InspectMaker é uma extensão poderosa que permite criar, gerenciar e executar scripts JavaScript personalizados. Com recursos avançados de injeção, você pode automatizar tarefas, modificar sites e aumentar sua produtividade.</p>
+          </div>
+
+          <div class="help-card">
+            <h3 class="help-card-title">
+              <span class="icon" id="features-icon"></span> Principais recursos
+            </h3>
+            <ul class="help-list">
+              <li><strong>Múltiplos ambientes de execução:</strong> Execute scripts no navegador ou no PC com Node.js</li>
+              <li><strong>Modos de injeção avançados:</strong> Desde instantâneo até baseado em eventos</li>
+              <li><strong>Editor de código completo:</strong> Com destaque de sintaxe e autocompletar</li>
+              <li><strong>Integração com AJAX:</strong> Interceptação de requisições e resposta personalizada</li>
+              <li><strong>Suporte a SPAs:</strong> Detecção de mudanças de URL e estado de navegação</li>
+              <li><strong>Configurações por navegador:</strong> Métodos de injeção otimizados para cada navegador</li>
+              <li><strong>Backup e restauração:</strong> Exportação e importação de scripts para cópia de segurança</li>
+            </ul>
+          </div>
+          
+          <div class="help-card">
+            <h3 class="help-card-title">
+              <span class="icon" id="modes-icon"></span> Modos de injeção
+            </h3>
+            <ul class="help-list">
+              <li><strong>Instantâneo:</strong> Executa o script imediatamente ao carregar a página</li>
+              <li><strong>Atrasado:</strong> Executa o script após um atraso especificado</li>
+              <li><strong>Sob demanda:</strong> Executa o script apenas quando acionado manualmente</li>
+              <li><strong>Baseado em evento:</strong> Executa o script quando um evento específico ocorrer</li>
+              <li><strong>Persistente:</strong> Executa o script em intervalos regulares</li>
+              <li><strong>Mudança de URL:</strong> Executa quando a URL muda em aplicações SPA</li>
+              <li><strong>Criação de elemento:</strong> Executa quando um elemento específico é criado no DOM</li>
+              <li><strong>Interceptação de AJAX:</strong> Intercepta e modifica requisições AJAX</li>
+              <li><strong>Mudança de estado de navegação:</strong> Executa quando o histórico de navegação muda</li>
+            </ul>
+          </div>
+
+          <div class="help-card">
+            <h3 class="help-card-title">
+              <span class="icon" id="environment-icon"></span> Ambientes de execução
+            </h3>
+            <ul class="help-list">
+              <li><strong>Navegador:</strong> Execute scripts no contexto da página web</li>
+              <li><strong>PC (Node.js):</strong> Execute scripts no servidor Node.js local</li>
+              <li><strong>Navegador com Helper PC:</strong> Combine ambos para recursos avançados</li>
+            </ul>
+            <div class="help-note">
+              <strong>Nota:</strong> Para usar o ambiente PC, você precisa executar o servidor Node.js local incluído com a extensão.
+            </div>
+          </div>
+
+          <div class="help-card">
+            <h3 class="help-card-title">
+              <span class="icon" id="examples-icon"></span> Exemplos de uso
+            </h3>
+            <div class="help-example">
+              <h4>Exemplo 1: Automatizar preenchimento de formulários</h4>
+              <pre class="help-code">// Script para preencher automaticamente formulários de login
+document.querySelector('#username').value = 'meuUsuario';
+document.querySelector('#password').value = 'minhaSenha';
+document.querySelector('form').submit();</pre>
+            </div>
+            <div class="help-example">
+              <h4>Exemplo 2: Extrair dados de uma página</h4>
+              <pre class="help-code">// Extrair todos os links de uma página
+const links = Array.from(document.querySelectorAll('a')).map(a => a.href);
+console.log(links);</pre>
+            </div>
+            <div class="help-example">
+              <h4>Exemplo 3: Modificar estilos de uma página</h4>
+              <pre class="help-code">// Adicionar modo escuro a qualquer site
+document.body.style.backgroundColor = '#121212';
+document.body.style.color = '#f0f0f0';
+const elements = document.querySelectorAll('p, h1, h2, h3, span, div');
+elements.forEach(el => el.style.color = '#f0f0f0');</pre>
+            </div>
+          </div>
+
+          <div class="help-card">
+            <h3 class="help-card-title">
+              <span class="icon" id="faq-icon"></span> Perguntas frequentes
+            </h3>
+            <div class="help-faq">
+              <div class="help-question">Como posso usar o servidor Node.js?</div>
+              <div class="help-answer">Execute o arquivo server.js na pasta da extensão usando o comando <code>node server.js</code>. O servidor começará a escutar na porta 8989 por padrão.</div>
+            </div>
+            <div class="help-faq">
+              <div class="help-question">Meu script não está sendo injetado. O que fazer?</div>
+              <div class="help-answer">Verifique se o padrão de URL está correto e se escolheu o método de injeção adequado para seu navegador. Consulte os logs para possíveis erros.</div>
+            </div>
+            <div class="help-faq">
+              <div class="help-question">Como posso fazer backup dos meus scripts?</div>
+              <div class="help-answer">Clique no botão de exportação (<span class="icon" style="display: inline-flex; vertical-align: middle;" id="help-export-icon"></span>) na barra superior para salvar todos os seus scripts como um arquivo JSON. Para restaurar, clique no botão de importação (<span class="icon" style="display: inline-flex; vertical-align: middle;" id="help-import-icon"></span>) e selecione o arquivo de backup.</div>
+            </div>
+            <div class="help-faq">
+              <div class="help-question">Como posso compartilhar meus scripts?</div>
+              <div class="help-answer">Use a função de exportação para gerar um arquivo de backup e compartilhe-o com outros usuários. Eles podem importar seus scripts usando a função de importação. Em versões futuras, adicionaremos um sistema de compartilhamento integrado.</div>
+            </div>
+            <div class="help-faq">
+              <div class="help-question">É possível depurar meus scripts?</div>
+              <div class="help-answer">Sim, use console.log() nos seus scripts e verifique a aba de Logs após a execução. Para depuração avançada, considere usar as ferramentas de desenvolvedor do navegador.</div>
+            </div>
+            <div class="help-faq">
+              <div class="help-question">O popup está muito pequeno ou grande para o meu dispositivo. Como ajustar?</div>
+              <div class="help-answer">O InspectMaker agora detecta automaticamente o tipo do seu dispositivo (desktop, tablet ou móvel) e ajusta o tamanho da janela adequadamente. O tamanho é lembrado para uso futuro.</div>
+            </div>
+          </div>
+
+          <div class="help-card">
+            <h3 class="help-card-title">
+              <span class="icon" id="support-icon"></span> Suporte
+            </h3>
+            <p>Para obter ajuda adicional, relatar bugs ou sugerir melhorias, entre em contato:</p>
+            <ul class="help-list">
+              <li><strong>Email:</strong> suporte@inspectmaker.com</li>
+              <li><strong>Site:</strong> <a href="https://inspectmaker.com" target="_blank">inspectmaker.com</a></li>
+              <li><strong>Fórum:</strong> <a href="https://community.inspectmaker.com" target="_blank">community.inspectmaker.com</a></li>
+            </ul>
+            <p class="help-version">Versão atual: 1.0.0</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toast-container"></div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/vendor/codemirror/codemirror.min.js"></script>
+  <script src="js/vendor/codemirror/javascript.min.js"></script>
+  <script src="js/vendor/codemirror/matchbrackets.min.js"></script>
+  <script src="js/vendor/codemirror/addon/hint/show-hint.js"></script>
+  <script src="js/vendor/codemirror/addon/hint/javascript-hint.js"></script>
+
+  <script src="icons/svg-icons.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/scripts.js"></script>
+  <script src="js/settings.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+{
+  "name": "inspectmaker-server",
+  "version": "1.0.0",
+  "description": "Servidor Node.js para a extensão InspectMaker",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "author": "InspectMaker",
+  "license": "MIT",
+  "dependencies": {
+    "vm2": "^3.9.11"
+  }
+}

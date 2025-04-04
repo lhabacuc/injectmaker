@@ -1,0 +1,47 @@
+content-script.js:46 Refused to execute inline script because it violates the following Content Security Policy directive: "script-src 'self' 'wasm-unsafe-eval' 'inline-speculation-rules' http://localhost:* http://127.0.0.1:*". Either the 'unsafe-inline' keyword, a hash ('sha256-BW6Ap1bwwh6InBGJutNvCaR9gHW8OjtbpC3/su/SlyQ='), or a nonce ('nonce-...') is required to enable inline execution.
+
+executeScript @ content-script.js:46
+(anonymous) @ content-script.js:13
+Show 2 more frames
+Show less
+content-script.js:46 Refused to execute inline script because it violates the following Content Security Policy directive: "script-src 'self' 'wasm-unsafe-eval' 'inline-speculation-rules' http://localhost:* http://127.0.0.1:*". Either the 'unsafe-inline' keyword, a hash ('sha256-BW6Ap1bwwh6InBGJutNvCaR9gHW8OjtbpC3/su/SlyQ='), or a nonce ('nonce-...') is required to enable inline execution.
+
+executeScript @ content-script.js:46
+(anonymous) @ content-script.js:13
+Show 2 more frames
+Show less
+content-script.js:46 Refused to execute inline script because it violates the following Content Security Policy directive: "script-src 'self' 'wasm-unsafe-eval' 'inline-speculation-rules' http://localhost:* http://127.0.0.1:*". Either the 'unsafe-inline' keyword, a hash ('sha256-BW6Ap1bwwh6InBGJutNvCaR9gHW8OjtbpC3/su/SlyQ='), or a nonce ('nonce-...') is required to enable inline execution.
+
+executeScript @ content-script.js:46
+(anonymous) @ content-script.js:13
+Show 2 more frames
+Show less
+
+app.js:27 InspectMaker inicializado com sucesso
+scripts.js:434 Erro ao salvar script: TypeError: Cannot read properties of null (reading 'classList')
+    at renderScriptLists (scripts.js:98:18)
+    at saveScript (scripts.js:426:7)
+saveScript @ scripts.js:434
+scripts.js:98 Uncaught (in promise) TypeError: Cannot read properties of null (reading 'classList')
+    at renderScriptLists (scripts.js:98:18)
+    at saveScript (scripts.js:426:7)
+app.js:71 Configurações atualizadas: {defaultExecutionEnvironment: 'browser', domainWhitelist: Array(1), editorTheme: 'dark', elevatedPermissions: true, fontSize: '14px', …}
+scripts.js:183 Erro ao criar script: TypeError: Cannot read properties of null (reading 'classList')
+    at renderScriptLists (scripts.js:98:18)
+    at scripts.js:176:9
+(anonymous) @ scripts.js:183
+Promise.catch
+createNewScript @ scripts.js:182
+scripts.js:434 Erro ao salvar script: TypeError: Cannot read properties of null (reading 'classList')
+    at renderScriptLists (scripts.js:98:18)
+    at saveScript (scripts.js:426:7)
+saveScript @ scripts.js:434
+await in saveScript
+(anonymous) @ scripts.js:30
+scripts.js:98 Uncaught (in promise) TypeError: Cannot read properties of null (reading 'classList')
+    at renderScriptLists (scripts.js:98:18)
+    at saveScript (scripts.js:426:7)
+renderScriptLists @ scripts.js:98
+saveScript @ scripts.js:426
+await in saveScript
+(anonymous) @ scripts.js:30
